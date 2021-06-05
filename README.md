@@ -38,3 +38,6 @@ Values for method:
 | 0x8 | Raw byte stored at value |
 | 0x9 | Raw word stored at value |
 | 0xA | Raw dword stored at value |
+Value is a byte. 
+The high nibble is from the target and the low nibble for the source.
+If you want to copy EAX to EBX, the value is 0x21 (2 for ebx, 1 for eax)
