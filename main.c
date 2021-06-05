@@ -168,6 +168,10 @@ void handle_cpu_instruction(){
             unsigned long jump_to_address = getNextInstructionDWord(1);
             cpu.currentProcess->register_isp = jump_to_address;
             break;
+        case CPU_INSTRUCTION_CALL:
+            break;
+        case CPU_INSTRUCTION_RET:
+            break;
         case CPU_INSTRUCTION_SET:
             teen_print("handle_cpu_instruction info: set value to register\n");
             unsigned char quotaX = getNextInstructionByte(1);
@@ -179,6 +183,14 @@ void handle_cpu_instruction(){
             setRegisterOrMemory(quoteA,waarde,2);
             
             cpu.currentProcess->register_isp += ( 2 + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB));
+            break;
+        case CPU_INSTRUCTION_ADD:
+            break;
+        case CPU_INSTRUCTION_SUB:
+            break;
+        case CPU_INSTRUCTION_DIV:
+            break;
+        case CPU_INSTRUCTION_MUL:
             break;
         case CPU_INSTRUCTION_INC:
             teen_print("handle_cpu_instruction info: increase value\n");
@@ -198,8 +210,26 @@ void handle_cpu_instruction(){
             
             cpu.currentProcess->register_isp += ( 2 + calculateMemoryOffset(quoteA));
             break;
-        case CPU_INSTRUCTION_CMP_EQU_N:
-            teen_print("handle_cpu_instruction info: compare and jump if not equals\n");
+        case CPU_INSTRUCTION_DEC:
+            teen_print("handle_cpu_instruction info: decrease value\n");
+            quotaX = getNextInstructionByte(1);
+            quoteA = quotaX & 0x0F;
+            quoteB = (quotaX >> 4) & 0x0F;
+            waarde = 0;
+            if(quoteB!=0){
+                teen_print("handle_cpu_instruction error: higher nibble of CPU_INSTRUCTION_INC param is set!\n");
+                cpu.state = CPU_STATE_PANICK;
+                return;
+            }
+
+            waarde = getRegisterOrMemory(quoteA, 2);
+            waarde --;
+            setRegisterOrMemory(quoteA,waarde,2);
+            
+            cpu.currentProcess->register_isp += ( 2 + calculateMemoryOffset(quoteA));
+            break;
+        case CPU_INSTRUCTION_CMP_EQU:
+            teen_print("handle_cpu_instruction info: compare and jump if equals\n");
             quotaX = getNextInstructionByte(1);
             quoteA = quotaX & 0x0F;
             quoteB = (quotaX >> 4) & 0x0F;
@@ -208,6 +238,23 @@ void handle_cpu_instruction(){
             unsigned long awaarde = getRegisterOrMemory(quoteA, 2);
             unsigned long bwaarde = getRegisterOrMemory(quoteB, 2 + calculateMemoryOffset(quoteA));
             unsigned long jumpwaarde = getNextInstructionDWord( 2 + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB) );
+            
+            cpu.currentProcess->register_isp += ( 2 + 4 + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB));
+
+            if(awaarde==bwaarde){
+                cpu.currentProcess->register_isp = jumpwaarde;
+            }
+            break;
+        case CPU_INSTRUCTION_CMP_EQU_N:
+            teen_print("handle_cpu_instruction info: compare and jump if not equals\n");
+            quotaX = getNextInstructionByte(1);
+            quoteA = quotaX & 0x0F;
+            quoteB = (quotaX >> 4) & 0x0F;
+            waarde = 0;
+
+            awaarde = getRegisterOrMemory(quoteA, 2);
+            bwaarde = getRegisterOrMemory(quoteB, 2 + calculateMemoryOffset(quoteA));
+            jumpwaarde = getNextInstructionDWord( 2 + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB) );
             
             cpu.currentProcess->register_isp += ( 2 + 4 + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB));
 
