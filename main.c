@@ -165,7 +165,7 @@ void handle_cpu_instruction(){
             break;
         case CPU_INSTRUCTION_JMP:
             teen_print("handle_cpu_instruction info: jump to instruction\n");
-            unsigned long jump_to_address = getNextInstructionDWord(1);
+            unsigned long jump_to_address = getNextInstructionDWord(BYTE_SIZE);
             cpu.currentProcess->register_isp = jump_to_address;
             break;
         case CPU_INSTRUCTION_CALL:
@@ -174,17 +174,29 @@ void handle_cpu_instruction(){
             break;
         case CPU_INSTRUCTION_SET:
             teen_print("handle_cpu_instruction info: set value to register\n");
-            unsigned char quotaX = getNextInstructionByte(1);
+            unsigned char quotaX = getNextInstructionByte(BYTE_SIZE);
             unsigned char quoteA = quotaX & 0x0F;
             unsigned char quoteB = (quotaX >> 4) & 0x0F;
             unsigned long waarde = 0;
 
-            waarde = getRegisterOrMemory(quoteB, 2 + calculateMemoryOffset(quoteA));
-            setRegisterOrMemory(quoteA,waarde,2);
+            waarde = getRegisterOrMemory(quoteB, BYTE_SIZE + BYTE_SIZE + calculateMemoryOffset(quoteA));
+            setRegisterOrMemory(quoteA,waarde,BYTE_SIZE + BYTE_SIZE);
             
-            cpu.currentProcess->register_isp += ( 2 + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB));
+            cpu.currentProcess->register_isp += ( BYTE_SIZE + BYTE_SIZE + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB));
             break;
         case CPU_INSTRUCTION_ADD:
+            teen_print("handle_cpu_instruction info: add function\n");
+            quotaX = getNextInstructionByte(1);
+            quoteA = quotaX & 0x0F;
+            quoteB = (quotaX >> 4) & 0x0F;
+            waarde = 0;
+
+            unsigned long awaarde = getRegisterOrMemory(quoteA, BYTE_SIZE + BYTE_SIZE);
+            unsigned long bwaarde = getRegisterOrMemory(quoteB, BYTE_SIZE + BYTE_SIZE + calculateMemoryOffset(quoteA));
+            awaarde += bwaarde;
+            setRegisterOrMemory(quoteA,awaarde,BYTE_SIZE + BYTE_SIZE);
+            
+            cpu.currentProcess->register_isp += ( BYTE_SIZE + BYTE_SIZE + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB));
             break;
         case CPU_INSTRUCTION_SUB:
             break;
@@ -194,7 +206,7 @@ void handle_cpu_instruction(){
             break;
         case CPU_INSTRUCTION_INC:
             teen_print("handle_cpu_instruction info: increase value\n");
-            quotaX = getNextInstructionByte(1);
+            quotaX = getNextInstructionByte(BYTE_SIZE);
             quoteA = quotaX & 0x0F;
             quoteB = (quotaX >> 4) & 0x0F;
             waarde = 0;
@@ -204,15 +216,15 @@ void handle_cpu_instruction(){
                 return;
             }
 
-            waarde = getRegisterOrMemory(quoteA, 2);
+            waarde = getRegisterOrMemory(quoteA, BYTE_SIZE + BYTE_SIZE );
             waarde ++;
-            setRegisterOrMemory(quoteA,waarde,2);
+            setRegisterOrMemory(quoteA,waarde,BYTE_SIZE + BYTE_SIZE);
             
-            cpu.currentProcess->register_isp += ( 2 + calculateMemoryOffset(quoteA));
+            cpu.currentProcess->register_isp += ( BYTE_SIZE + BYTE_SIZE + calculateMemoryOffset(quoteA));
             break;
         case CPU_INSTRUCTION_DEC:
             teen_print("handle_cpu_instruction info: decrease value\n");
-            quotaX = getNextInstructionByte(1);
+            quotaX = getNextInstructionByte(BYTE_SIZE);
             quoteA = quotaX & 0x0F;
             quoteB = (quotaX >> 4) & 0x0F;
             waarde = 0;
@@ -222,24 +234,24 @@ void handle_cpu_instruction(){
                 return;
             }
 
-            waarde = getRegisterOrMemory(quoteA, 2);
+            waarde = getRegisterOrMemory(quoteA, BYTE_SIZE + BYTE_SIZE);
             waarde --;
-            setRegisterOrMemory(quoteA,waarde,2);
+            setRegisterOrMemory(quoteA,waarde,BYTE_SIZE + BYTE_SIZE);
             
-            cpu.currentProcess->register_isp += ( 2 + calculateMemoryOffset(quoteA));
+            cpu.currentProcess->register_isp += ( BYTE_SIZE + BYTE_SIZE + calculateMemoryOffset(quoteA));
             break;
         case CPU_INSTRUCTION_CMP_EQU:
             teen_print("handle_cpu_instruction info: compare and jump if equals\n");
-            quotaX = getNextInstructionByte(1);
+            quotaX = getNextInstructionByte(BYTE_SIZE);
             quoteA = quotaX & 0x0F;
             quoteB = (quotaX >> 4) & 0x0F;
             waarde = 0;
 
-            unsigned long awaarde = getRegisterOrMemory(quoteA, 2);
-            unsigned long bwaarde = getRegisterOrMemory(quoteB, 2 + calculateMemoryOffset(quoteA));
-            unsigned long jumpwaarde = getNextInstructionDWord( 2 + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB) );
+            awaarde = getRegisterOrMemory(quoteA, BYTE_SIZE + BYTE_SIZE);
+            bwaarde = getRegisterOrMemory(quoteB, BYTE_SIZE + BYTE_SIZE + calculateMemoryOffset(quoteA));
+            unsigned long jumpwaarde = getNextInstructionDWord( BYTE_SIZE + BYTE_SIZE + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB) );
             
-            cpu.currentProcess->register_isp += ( 2 + 4 + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB));
+            cpu.currentProcess->register_isp += ( BYTE_SIZE + BYTE_SIZE + DWORD_SIZE + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB));
 
             if(awaarde==bwaarde){
                 cpu.currentProcess->register_isp = jumpwaarde;
@@ -247,16 +259,16 @@ void handle_cpu_instruction(){
             break;
         case CPU_INSTRUCTION_CMP_EQU_N:
             teen_print("handle_cpu_instruction info: compare and jump if not equals\n");
-            quotaX = getNextInstructionByte(1);
+            quotaX = getNextInstructionByte(BYTE_SIZE);
             quoteA = quotaX & 0x0F;
             quoteB = (quotaX >> 4) & 0x0F;
             waarde = 0;
 
-            awaarde = getRegisterOrMemory(quoteA, 2);
-            bwaarde = getRegisterOrMemory(quoteB, 2 + calculateMemoryOffset(quoteA));
-            jumpwaarde = getNextInstructionDWord( 2 + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB) );
+            awaarde = getRegisterOrMemory(quoteA, BYTE_SIZE + BYTE_SIZE);
+            bwaarde = getRegisterOrMemory(quoteB, BYTE_SIZE + BYTE_SIZE + calculateMemoryOffset(quoteA));
+            jumpwaarde = getNextInstructionDWord( BYTE_SIZE + BYTE_SIZE + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB) );
             
-            cpu.currentProcess->register_isp += ( 2 + 4 + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB));
+            cpu.currentProcess->register_isp += ( BYTE_SIZE + BYTE_SIZE + DWORD_SIZE + calculateMemoryOffset(quoteA) + calculateMemoryOffset(quoteB));
 
             if(awaarde!=bwaarde){
                 cpu.currentProcess->register_isp = jumpwaarde;

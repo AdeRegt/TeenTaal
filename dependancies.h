@@ -79,6 +79,10 @@ typedef struct{
 #define CPU_REGISTER_RAW_WORD_DI        0x09
 #define CPU_REGISTER_RAW_DWORD_DI       0x0A
 
+#define BYTE_SIZE                       1
+#define WORD_SIZE                       2
+#define DWORD_SIZE                      4
+
 /*
     Print a string message to the console, ending with 0x00
     @param message the string to print
