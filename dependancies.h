@@ -1,5 +1,5 @@
 typedef struct{
-    unsigned long address;
+    void *address;
     unsigned long register_eax;
     unsigned long register_ebx;
     unsigned long register_ecx;
@@ -94,3 +94,6 @@ void teen_print(const char* message);
     @param character the character to print
 */
 void teen_print_char_as_hex(unsigned char character);
+
+
+void *loadSourceFile(char* path);

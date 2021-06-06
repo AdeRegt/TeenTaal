@@ -1,4 +1,5 @@
 #include "dependancies.h"
+#include <stdint.h>
 
 /*
     Stack of process slots
@@ -15,7 +16,7 @@ VirtualCPU cpu;
     @param address the real address where the new code is
     @return RES_ERROR when there is something wrong or the PID when it is succesfull
 */
-char install_process(unsigned long address){
+char install_process(void *address){
     if(address>0){
         for(int i = 0 ; i < MAX_PROCESSES ; i++){
             Process *proc = (Process*) (&processes[i]);
@@ -38,7 +39,7 @@ char install_process(unsigned long address){
 /*
     Dummy data to test the VM on!
 */
-unsigned char dummydata[10] = {
+unsigned char dummydata[100] = {
     CPU_INSTRUCTION_SET,
     CPU_REGISTER_POINTER_EBX | (CPU_REGISTER_RAW_BYTE_DI << 4),
     10,
@@ -47,27 +48,32 @@ unsigned char dummydata[10] = {
     CPU_INSTRUCTION_CMP_EQU_N,
     CPU_REGISTER_POINTER_EBX | (CPU_REGISTER_POINTER_EAX << 4),
     3,
+    0,
+    0,
+    0,
+    CPU_INSTRUCTION_HALT,
+    CPU_INSTRUCTION_HALT,
     CPU_INSTRUCTION_HALT,
     CPU_INSTRUCTION_HALT
 };
 
 unsigned char getNextInstructionByte(unsigned long offset){
     Process *proc = cpu.currentProcess;
-    unsigned long instructionpointer = proc->address + proc->register_isp + offset;
+    unsigned long instructionpointer = ((uintptr_t)proc->address) + proc->register_isp + offset;
     unsigned char currentInstruction = ((unsigned char*)instructionpointer)[0];
     return currentInstruction;
 }
 
 unsigned short getNextInstructionWord(unsigned long offset){
     Process *proc = cpu.currentProcess;
-    unsigned long instructionpointer = proc->address + proc->register_isp + offset;
+    unsigned long instructionpointer = ((uintptr_t)proc->address) + proc->register_isp + offset;
     unsigned short currentInstruction = ((unsigned short*)instructionpointer)[0];
     return currentInstruction;
 }
 
 unsigned long getNextInstructionDWord(unsigned long offset){
     Process *proc = cpu.currentProcess;
-    unsigned long instructionpointer = proc->address + proc->register_isp + offset;
+    unsigned long instructionpointer = ((uintptr_t)proc->address) + proc->register_isp + offset;
     unsigned long currentInstruction = ((unsigned long*)instructionpointer)[0];
     return currentInstruction;
 }
@@ -290,7 +296,19 @@ void handle_cpu_instruction(){
     @result the result of the execution
 */
 int main(int argc,char** argv){
-    int pid = install_process((unsigned long)&dummydata);
+    int pid = 0;
+    if(argc==2){
+        teen_print("main: Loading sourcefile\n");
+        void *dummydata = loadSourceFile(argv[1]);
+        if((unsigned long)dummydata==RES_ERROR){
+            teen_print("main: Unable to load sourcefile\n");
+            return 2;
+        }
+        pid = install_process(dummydata);
+    }else{
+        teen_print("main: Loading dummy data\n");
+        pid = install_process((void *)&dummydata);
+    }
     cpu.currentProcess = (Process*)(&processes[pid]);
     cpu.state = CPU_STATE_RUNNING;
     while(cpu.state==CPU_STATE_RUNNING){
