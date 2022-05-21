@@ -85,3 +85,5 @@ char* getSourceFileBuffer();
 
 struct OpcodeObject *createAST(struct CommandoArgumentIn *head);
 void syntaxError(struct CommandoArgumentIn *anchor,char* msg);
+void link(struct OpcodeObject* head);
+void output(struct OpcodeObject* head,FILE* outputfile);

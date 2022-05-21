@@ -51,11 +51,8 @@ int main(int argc,char** argv){
 
         root = parseSourceFile();
         opcodetree = createAST(root);
-        struct CommandoArgumentIn *cai = root;
-        while(cai){
-            printf("-> strarg [%x|%s] %s \n",cai->row,cai->is_string?"STR":"STA",cai->message);
-            cai = cai->next;
-        }
+        link(opcodetree);
+        output(opcodetree,outputfile);
         
         fclose(file);
         fclose(outputfile);
