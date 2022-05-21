@@ -12,7 +12,7 @@ struct CommandoArgumentIn *root;
 struct OpcodeObject *opcodetree;
 
 void syntaxError(struct CommandoArgumentIn *anchor,char* msg){
-    printf("Error in row %x : parse error: %s \n",anchor->row,msg);
+    printf("Error in row %x : parse error: %s [seen: %s]\n",anchor->row,msg,anchor->message);
     fclose(file);
     fclose(outputfile);
     exit(EXIT_FAILURE);

@@ -1,3 +1,4 @@
+#include "../../commonlexer.h"
 /**
  * @brief Parser structure
  * 
@@ -7,7 +8,7 @@ typedef struct CommandoArgumentIn{
      * @brief The content of the message
      * 
      */
-    char message[255];
+    char message[MAX_VARIABLE_SIZE];
     /**
      * @brief Row in the sourcefile
      * 

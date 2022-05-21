@@ -1,3 +1,2 @@
 main:
-INT 0
-define string "hello my world"
+RET
