@@ -37,8 +37,10 @@ struct CommandoArgumentIn *parseSourceFile(){
             int last = current->is_string;
             parser_reset_pointer();
             current->is_string = last==0;
-        }else{
+        }else if(internalpointer<255){
             current->message[internalpointer++] = deze;
+        }else{
+            syntaxError(current,"string is too large");
         }
     }
     parser_reset_pointer();

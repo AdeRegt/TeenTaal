@@ -9,6 +9,14 @@ int file_size;
 char *inputbuffer;
 
 struct CommandoArgumentIn *root;
+struct OpcodeObject *opcodetree;
+
+void syntaxError(struct CommandoArgumentIn *anchor,char* msg){
+    printf("Error in row %x : parse error: %s \n",anchor->row,msg);
+    fclose(file);
+    fclose(outputfile);
+    exit(EXIT_FAILURE);
+}
 
 int getFileSize(){
     return file_size;
@@ -42,6 +50,7 @@ int main(int argc,char** argv){
         fread(inputbuffer,file_size,1,file);
 
         root = parseSourceFile();
+        opcodetree = createAST(root);
         struct CommandoArgumentIn *cai = root;
         while(cai){
             printf("-> strarg [%x|%s] %s \n",cai->row,cai->is_string?"STR":"STA",cai->message);
